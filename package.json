@@ -1,15 +1,15 @@
 {
-  "name": "Excel-course",
+  "name": "webpack",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=development webpack-dev-server --mode development --watch --open --hot",
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --mode development --watch --open",
     "build": "cross-env NODE_ENV=production webpack --mode production"
   },
   "browserslist": "> 0.25%, not dead",
   "author": "oleg",
-  "license": "Oleg Usachev",
+  "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.10.1",
-    "@babel/preset-env": "^7.10.2"
+    "@babel/preset-env": "^7.10.2",
+    "normalize.css": "^8.0.1"
   }
 }
