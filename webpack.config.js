@@ -1,6 +1,7 @@
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plugin");
 const TerserWebpackPlugin = require("terser-webpack-plugin");
@@ -74,8 +75,8 @@ module.exports = {
   },
   optimization: optimization(),
   devServer: {
-    hot: true,
-    // writeToDisk: isDev,
+    hot: isDev,
+    writeToDisk: isDev,
   },
   devtool: isDev ? "source-map" : "",
   plugins: [
@@ -86,6 +87,14 @@ module.exports = {
       },
     }),
     new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, "src/favicon.ico"),
+          to: path.resolve(__dirname, "dist"),
+        },
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: fileName("css"),
     }),
