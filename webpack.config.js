@@ -1,5 +1,5 @@
 const HTMLWebpackPlugin = require("html-webpack-plugin");
-const Path = require("path");
+const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -64,19 +64,14 @@ const jsLoaders = () => {
 const fileName = (ext) => (isDev ? `[name].${ext}` : `[name].[hash:4].${ext}`);
 
 module.exports = {
-  context: Path.resolve(__dirname, "src"),
+  context: path.resolve(__dirname, "src"),
   mode: "development",
   entry: {
-    app: Path.resolve(__dirname, "src/scripts/index.js"),
-    footer: Path.resolve(__dirname, "src/scripts/footer.js"),
-    map: Path.resolve(__dirname, "src/scripts/about-map.js"),
-    fixed: Path.resolve(__dirname, "src/scripts/fixed.js"),
-    tabs: Path.resolve(__dirname, "src/scripts/tabs.js"),
-    overlay: Path.resolve(__dirname, "src/scripts/overlay.js"),
+    main: ["@babel/polyfill", "./index.js"],
   },
   output: {
     filename: fileName("js"),
-    path: Path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "dist"),
   },
   optimization: optimization(),
   devServer: {
@@ -86,111 +81,24 @@ module.exports = {
   devtool: isDev ? "source-map" : "",
   plugins: [
     new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/index.html"),
-      filename: "index.html",
-      chunks: ["app", "overlay", "footer"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/about.html"),
-      filename: "about.html",
-      chunks: ["app", "map", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/advertisers.html"),
-      filename: "advertisers.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/publishers.html"),
-      filename: "publishers.html",
-      chunks: ["app", "footer", "overlay", "fixed", "tabs"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/login.html"),
-      filename: "login.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/blog.html"),
-      filename: "blog.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/sign-up.html"),
-      filename: "sign-up.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/self-service.html"),
-      filename: "self-service.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/contact.html"),
-      filename: "contact.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/privacy-policy.html"),
-      filename: "privacy-policy.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/advertisers-terms.html"),
-      filename: "advertisers-terms.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
-      minify: {
-        collapseWhitespace: isProd,
-      },
-    }),
-    new HTMLWebpackPlugin({
-      template: Path.resolve(__dirname, "src/publishers-terms.html"),
-      filename: "publishers-terms.html",
-      chunks: ["app", "footer", "overlay", "fixed"],
+      template: "./index.html",
       minify: {
         collapseWhitespace: isProd,
       },
     }),
     new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, "src/favicon.ico"),
+          to: path.resolve(__dirname, "dist"),
+        },
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: fileName("css"),
     }),
   ],
-  resolve: {
-    alias: {
-      "~": Path.resolve(__dirname, "../src"),
-    },
-  },
   module: {
     rules: [
       {
@@ -202,13 +110,8 @@ module.exports = {
         use: cssLoaders("sass-loader"),
       },
       {
-        test: /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)(\?.*)?$/,
-        use: {
-          loader: "file-loader",
-          options: {
-            name: "[Path][name].[ext]",
-          },
-        },
+        test: /\.(png|jpg|svg|jpeg|gif|ico)$/,
+        use: ["file-loader"],
       },
       {
         test: /\.js$/,
