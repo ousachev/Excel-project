@@ -1,47 +1,13 @@
-const HTMLWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HTMLWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const OptimizeCssAssetsWebpackPlugin = require("optimize-css-assets-webpack-plugin");
-const TerserWebpackPlugin = require("terser-webpack-plugin");
 
-const isDev = process.env.NODE_ENV === "development";
-const isProd = !isDev;
-const optimization = () => {
-  const config = {
-    splitChunks: {
-      chunks: "all",
-    },
-  };
+const isProd = process.env.NODE_ENV === "production";
+const isDev = !isProd;
 
-  if (isProd) {
-    config.minimizer = [
-      new OptimizeCssAssetsWebpackPlugin(),
-      new TerserWebpackPlugin(),
-    ];
-  }
-
-  return config;
-};
-
-const cssLoaders = (extra) => {
-  const loaders = [
-    {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        hmr: isDev,
-      },
-    },
-    "css-loader",
-  ];
-
-  if (extra) {
-    loaders.push(extra);
-  }
-
-  return loaders;
-};
+const filename = (ext) => (isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`);
 
 const jsLoaders = () => {
   const loaders = [
@@ -61,57 +27,60 @@ const jsLoaders = () => {
   return loaders;
 };
 
-const fileName = (ext) => (isDev ? `[name].${ext}` : `[name].[hash:4].${ext}`);
-
 module.exports = {
   context: path.resolve(__dirname, "src"),
   mode: "development",
-  entry: {
-    main: ["@babel/polyfill", "./index.js"],
-  },
+  entry: ["@babel/polyfill", "./index.js"],
   output: {
-    filename: fileName("js"),
+    filename: filename("js"),
     path: path.resolve(__dirname, "dist"),
   },
-  optimization: optimization(),
-  devServer: {
-    hot: isDev,
-    writeToDisk: isDev,
+  resolve: {
+    extensions: [".js"],
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      "@core": path.resolve(__dirname, "src/core"),
+    },
   },
-  devtool: isDev ? "source-map" : "",
+  devtool: isDev ? "source-map" : false,
+  devServer: {
+    port: 3000,
+    hot: isDev,
+  },
   plugins: [
+    new CleanWebpackPlugin(),
     new HTMLWebpackPlugin({
-      template: "./index.html",
+      template: "index.html",
       minify: {
+        removeComments: isProd,
         collapseWhitespace: isProd,
       },
     }),
-    new CleanWebpackPlugin(),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: path.resolve(__dirname, "src/favicon.ico"),
-          to: path.resolve(__dirname, "dist"),
-        },
-      ],
-    }),
+    new CopyPlugin([
+      {
+        from: path.resolve(__dirname, "src/favicon.ico"),
+        to: path.resolve(__dirname, "dist"),
+      },
+    ]),
     new MiniCssExtractPlugin({
-      filename: fileName("css"),
+      filename: filename("css"),
     }),
   ],
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: cssLoaders(),
-      },
-      {
-        test: /\.s[ac]ss$/,
-        use: cssLoaders("sass-loader"),
-      },
-      {
-        test: /\.(png|jpg|svg|jpeg|gif|ico)$/,
-        use: ["file-loader"],
+        test: /\.s[ac]ss$/i,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              hmr: isDev,
+              reloadAll: true,
+            },
+          },
+          "css-loader",
+          "sass-loader",
+        ],
       },
       {
         test: /\.js$/,
